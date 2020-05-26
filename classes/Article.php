@@ -84,6 +84,8 @@ class Article
       
       if (isset($data['content'])) {
           $this->content = $data['content'];  
+          $text = $data['content'];
+          $this->firstText = mb_substr($text, 0,50);  
       }
     }
 
