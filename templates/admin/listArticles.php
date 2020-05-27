@@ -17,6 +17,7 @@
               <th>Publication Date</th>
               <th>Article</th>
               <th>Category</th>
+              <th>Active</th>
             </tr>
 
 <!--<?php echo "<pre>"; print_r ($results['articles'][2]->publicationDate); echo "</pre>"; ?> Обращаемся к дате массива $results. Дата = 0 -->
@@ -27,7 +28,7 @@
               <td><?php echo date('j M Y', $article->publicationDate)?></td>
               <td>
                 <?php echo $article->title?>
-              </td>
+              </td> 
               <td>
                   
              <!--   <?php echo $results['categories'][$article->categoryId]->name?> Эта строка была скопирована с сайта-->
@@ -42,6 +43,9 @@
                 echo "Без категории";
                 }?>
               </td>
+              <td>
+                <?php echo"<input class='active' type='checkbox' " . ($article->active ? "checked" :"");?>>
+              </td>
             </tr>
 
     <?php } ?>
@@ -51,5 +55,7 @@
           <p><?php echo $results['totalRows']?> article<?php echo ( $results['totalRows'] != 1 ) ? 's' : '' ?> in total.</p>
 
           <p><a href="admin.php?action=newArticle">Add a New Article</a></p>
+            <script  type="text/javascript">$(".active").on('click', function( event ) {
+	  event.preventDefault();})</script>
 
 <?php include "templates/include/footer.php" ?>              

@@ -1,7 +1,11 @@
 
 <?php include "templates/include/header.php" ?>
     <ul id="headlines">
-    <?php foreach ($results['articles'] as $article) { ?>
+    <?php foreach ($results['articles'] as $article) {
+        if ($article->active == 0){
+            continue;
+        }
+        ?>
         <li class='<?php echo $article->id?>'>
             <h2>
                 <span class="pubDate">

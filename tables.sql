@@ -6,7 +6,7 @@ CREATE TABLE articles
   categoryId      smallint unsigned NOT NULL,
   title           varchar(255) NOT NULL,                     
   summary         text NOT NULL,                             
-  content         mediumtext NOT NULL,                      
+  content         mediumtext NOT NULL,    
  
   PRIMARY KEY     (id)
 );

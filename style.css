@@ -351,4 +351,14 @@ ul.ajax-load li {
     padding: 3px; /* Поля вокруг текста */
     font-size: 12px;
 }
-        
+      
+.active {
+   width : 60%;
+   user-select:  none;
+   outline: none;
+   cursor : pointer;
+}
+.activeChange{
+    width: 5%;
+    padding: 1em;
+}

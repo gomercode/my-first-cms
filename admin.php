@@ -140,6 +140,7 @@ function editArticle() {
         }
 
         $article->storeFormValues( $_POST );
+           
         $article->update();
         header( "Location: admin.php?status=changesSaved" );
 

@@ -36,6 +36,10 @@ class Article
     * @var string HTML содержание статьи
     */
     public $content = null;
+     /**
+    * @var string активность
+    */
+    public $active = "1";
     /**
     * Устанавливаем свойства с помощью значений в заданном массиве
     *
@@ -86,6 +90,9 @@ class Article
           $this->content = $data['content'];  
           $text = $data['content'];
           $this->firstText = mb_substr($text, 0,50);  
+      }
+       if (isset($data['active'])) {
+          $this->active = $data['active'];         
       }
     }
 
@@ -203,13 +210,20 @@ class Article
 
         // Вставляем статью
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content ) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content )";
+        $sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content, active) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content, :active )";
         $st = $conn->prepare ( $sql );
         $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
         $st->bindValue( ":categoryId", $this->categoryId, PDO::PARAM_INT );
         $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
         $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
         $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
+        $st->bindValue( ":active", $this->active, PDO::PARAM_STR );
+        if($this->active == "check"){
+            $st->bindValue( ":active", "1", PDO::PARAM_INT );
+        }
+        else{
+              $st->bindValue( ":active", "0", PDO::PARAM_INT );
+        }
         $st->execute();
         $this->id = $conn->lastInsertId();
         $conn = null;
@@ -228,8 +242,7 @@ class Article
       // Обновляем статью
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
-              . " categoryId=:categoryId, title=:title, summary=:summary,"
-              . " content=:content WHERE id = :id";
+              ."categoryId=:categoryId, title=:title, summary=:summary, active=:active,"."content=:content WHERE id = :id";
       
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
@@ -238,6 +251,12 @@ class Article
       $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
       $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
+       if($this->active == "check"){
+           $st->bindValue(":active", "1", PDO::PARAM_INT );
+        }
+        else{
+              $st->bindValue(":active", "0", PDO::PARAM_INT );
+        }
       $st->execute();
       $conn = null;
     }
