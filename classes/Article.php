@@ -39,7 +39,7 @@ class Article
      /**
     * @var string активность
     */
-    public $active = "1";
+    public $active = null;
     /**
     * Устанавливаем свойства с помощью значений в заданном массиве
     *
@@ -217,7 +217,6 @@ class Article
         $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
         $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
         $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
-        $st->bindValue( ":active", $this->active, PDO::PARAM_STR );
         if($this->active == "check"){
             $st->bindValue( ":active", "1", PDO::PARAM_INT );
         }

@@ -55,6 +55,7 @@
           <p><?php echo $results['totalRows']?> article<?php echo ( $results['totalRows'] != 1 ) ? 's' : '' ?> in total.</p>
 
           <p><a href="admin.php?action=newArticle">Add a New Article</a></p>
+            <p><a href="admin.php?action=newUser">Add a New User</a></p>
             <script  type="text/javascript">$(".active").on('click', function( event ) {
 	  event.preventDefault();})</script>
 

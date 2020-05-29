@@ -38,6 +38,18 @@ switch ($action) {
     case 'deleteCategory':
         deleteCategory();
         break;
+    case 'listUsers':
+        listUsers();
+        break;
+    case 'editUser':
+        editUser();
+        break;
+    case 'deleteUser':
+        deleteUser();
+        break;
+    case 'newUser':
+        newUser();
+        break;
     default:
         listArticles();
 }
@@ -53,20 +65,55 @@ function login() {
     if (isset($_POST['login'])) {
 
         // Пользователь получает форму входа: попытка авторизировать пользователя
-
-        if ($_POST['username'] == ADMIN_USERNAME 
-                && $_POST['password'] == ADMIN_PASSWORD) {
-
-          // Вход прошел успешно: создаем сессию и перенаправляем на страницу администратора
-          $_SESSION['username'] = ADMIN_USERNAME;
-          header( "Location: admin.php");
-
-        } else {
-
-          // Ошибка входа: выводим сообщение об ошибке для пользователя
-          $results['errorMessage'] = "Неправильный пароль, попробуйте ещё раз.";
-          require( TEMPLATE_PATH . "/admin/loginForm.php" );
+        
+        $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
+        $sql = "SELECT * FROM users";
+        
+        $st = $conn->prepare($sql);
+        $st->bindValue(":login", $_POST['username'], PDO::PARAM_STR);
+        $exe = $st->execute();
+        $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+       
+        
+        foreach ($rows as $row){
+             if($row['login'] == $_POST['username'] && $row['password'] == $_POST['password'] ){
+                 if($row['activity'] == '1'){
+                     
+                    $_SESSION['username'] = $_POST['username'];
+                    
+                    header( "Location: admin.php");
+                  
+                 }
+                 
+                 else{
+                     
+                     $results['errorMessage'] = "Вы не активны, попробуйте ещё раз.";
+                     break;
+  
+                 }
+                 
+             }
+             
+            else {
+                
+                 $results['errorMessage'] = "Неправильный логин или пароль, попробуйте ещё раз.";
+               }
+            
         }
+                  require( TEMPLATE_PATH . "/admin/loginForm.php" );
+                 
+             
+        
+//        if($password[0]['password'] == $_POST['password'] ){
+//           $_SESSION['username'] = $_POST['username'];
+//          header( "Location: admin.php");
+//        }
+//       else {
+//
+//          // Ошибка входа: выводим сообщение об ошибке для пользователя
+//          $results['errorMessage'] = "Неправильный пароль, попробуйте ещё раз.";
+//          require( TEMPLATE_PATH . "/admin/loginForm.php" );
+//        }
 
     } else {
 
@@ -304,4 +351,108 @@ function deleteCategory() {
     header( "Location: admin.php?action=listCategories&status=categoryDeleted" );
 }
 
-        
+function listUsers() {
+    $results = array();
+    
+    $data = User::getList();
+    $results['users'] = $data['results'];
+    $results['totalRows'] = $data['totalRows'];
+    
+    
+    $results['pageTitle'] = "Все Пользователи";
+
+    if (isset($_GET['error'])) { // вывод сообщения об ошибке (если есть)
+        if ($_GET['error'] == "userNotFound") 
+            $results['errorMessage'] = "Error: User not found.";
+    }
+
+    if (isset($_GET['status'])) { // вывод сообщения (если есть)
+        if ($_GET['status'] == "changesSaved") {
+            $results['statusMessage'] = "Your changes have been saved.";
+        }
+        if ($_GET['status'] == "userDeleted")  {
+            $results['statusMessage'] = "User deleted.";
+        }
+    }
+
+    require(TEMPLATE_PATH . "/user/listUsers.php" );
+}
+
+
+function deleteUser() {
+
+    if ( !$user = User::getById( (int)$_GET['userId'] ) ) {
+        header( "Location: admin.php?error=userNotFound" );
+        return;
+    }
+
+    $user->delete();
+    header( "Location: admin.php?status=userDeleted" );
+}
+
+
+function editUser() {
+	  
+    $results = array();
+    $results['pageTitle'] = "Edit User";
+    $results['formAction'] = "editUser";
+
+    if (isset($_POST['saveChanges'])) {
+
+        // Пользователь получил форму редактирования статьи: сохраняем изменения
+        if ( !$user = User::getById( (int)$_POST['userId'] ) ) {
+            header( "Location: admin.php?error=userNotFound" );
+            return;
+        }
+
+        $user->storeFormValues( $_POST );
+           
+        $user->update();
+        header( "Location: admin.php?status=changesSaved" );
+
+    } elseif ( isset( $_POST['cancel'] ) ) {
+
+        // Пользователь отказался от результатов редактирования: возвращаемся к списку статей
+        header( "Location: admin.php" );
+    } else {
+
+        // Пользвоатель еще не получил форму редактирования: выводим форму
+        $results['user'] = User::getById((int)$_GET['userId']);
+        require(TEMPLATE_PATH . "/user/editUser.php");
+    }
+
+}
+
+function newUser() {
+	  
+    $results = array();
+    $results['pageTitle'] = "New User";
+    $results['formAction'] = "newUser";
+
+    if ( isset( $_POST['saveChanges'] ) ) {
+//            echo "<pre>";
+//            print_r($results);
+//            print_r($_POST);
+//            echo "<pre>";
+//            В $_POST данные о статье сохраняются корректно
+        // Пользователь получает форму редактирования статьи: сохраняем новую статью
+        $user = new User();
+        $user->storeFormValues( $_POST );
+//            echo "<pre>";
+//            print_r($article);
+//            echo "<pre>";
+//            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)          
+        $user->insert();
+        header( "Location: admin.php?status=changesSaved" );
+
+    } elseif ( isset( $_POST['cancel'] ) ) {
+
+        // Пользователь сбросил результаты редактирования: возвращаемся к списку статей
+        header( "Location: admin.php" );
+    } else {
+
+        // Пользователь еще не получил форму редактирования: выводим форму
+        $results['user'] = new User;
+        require( TEMPLATE_PATH . "/user/editUser.php" );
+    }
+}
