@@ -40,6 +40,12 @@ class Article
     * @var string активность
     */
     public $active = null;
+     /**
+    * @var int ID категории статьи
+    */
+    public $subcategoryId = null;
+    
+    
     /**
     * Устанавливаем свойства с помощью значений в заданном массиве
     *
@@ -93,6 +99,10 @@ class Article
       }
        if (isset($data['active'])) {
           $this->active = $data['active'];         
+      }
+       if (isset($data['subcategoryId'])) {
+          $this->subcategoryId = $data['subcategoryId'];  
+          
       }
     }
 
@@ -151,13 +161,21 @@ class Article
     * @return Array|false Двух элементный массив: results => массив объектов Article; totalRows => общее количество строк
     */
     public static function getList($numRows=1000000, 
-            $categoryId=null, $order="publicationDate DESC") 
+            $categoryId=null, $subcategoryId=null, $order="publicationDate DESC") 
     {
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
-        $categoryClause = $categoryId ? "WHERE categoryId = :categoryId" : "";
+        
+        if($categoryId){
+            $Clause = "WHERE categoryId = :categoryId";
+        } else if($subcategoryId) {
+            $Clause = "WHERE subcategoryId = :subcategoryId";
+        }
+        else{
+             $Clause = "";
+        }
         $sql = "SELECT SQL_CALC_FOUND_ROWS *, UNIX_TIMESTAMP(publicationDate) 
                 AS publicationDate
-                FROM articles $categoryClause
+                FROM articles $Clause
                 ORDER BY  $order  LIMIT :numRows";
         
         $st = $conn->prepare($sql);
@@ -167,8 +185,13 @@ class Article
 //                        Здесь $st - текст предполагаемого SQL-запроса, причём переменные не отображаются
         $st->bindValue(":numRows", $numRows, PDO::PARAM_INT);
         
-        if ($categoryId) 
-            $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
+        if ($categoryId) {
+             $st->bindValue( ":categoryId", $categoryId, PDO::PARAM_INT);
+        }
+        else if($subcategoryId){
+             $st->bindValue( ":subcategoryId", $subcategoryId, PDO::PARAM_INT);
+        }
+
         
         $st->execute(); // выполняем запрос к базе данных
 //                        echo "<pre>";
@@ -178,7 +201,12 @@ class Article
         $list = array();
 
         while ($row = $st->fetch()) {
+           
+            
             $article = new Article($row);
+            
+           
+            
             $list[] = $article;
         }
 
@@ -210,10 +238,11 @@ class Article
 
         // Вставляем статью
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
-        $sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content, active) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content, :active )";
+        $sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content, active, subcategoryId) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content, :active, :subcategoryId )";
         $st = $conn->prepare ( $sql );
         $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
         $st->bindValue( ":categoryId", $this->categoryId, PDO::PARAM_INT );
+        $st->bindValue( ":subcategoryId", $this->subcategoryId, PDO::PARAM_INT );
         $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
         $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
         $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
@@ -241,11 +270,12 @@ class Article
       // Обновляем статью
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
-              ."categoryId=:categoryId, title=:title, summary=:summary, active=:active,"."content=:content WHERE id = :id";
+              ."categoryId=:categoryId, title=:title, summary=:summary, active=:active, subcategoryId=:subcategoryId"."content=:content WHERE id = :id";
       
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
       $st->bindValue( ":categoryId", $this->categoryId, PDO::PARAM_INT );
+      $st->bindValue( ":subcategoryId", $this->subcategoryId, PDO::PARAM_INT );
       $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
       $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
       $st->bindValue( ":content", $this->content, PDO::PARAM_STR );

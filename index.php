@@ -23,6 +23,9 @@ function initApplication()
         case 'viewArticle':
           viewArticle();
           break;
+       case 'subarchive':
+          subarchive();
+          break;
         default:
           homepage();
     }
@@ -48,10 +51,39 @@ function archive()
         $results['categories'][$category->id] = $category;
     }
     
+ 
+    
     $results['pageHeading'] = $results['category'] ?  $results['category']->name : "Article Archive";
     $results['pageTitle'] = $results['pageHeading'] . " | Widget News";
     
     require( TEMPLATE_PATH . "/archive.php" );
+}
+
+function subarchive() 
+{
+    $results = [];
+    
+    
+    $subcategoryId = ( isset( $_GET['subcategoryId'] ) && $_GET['subcategoryId'] ) ? (int)$_GET['subcategoryId'] : null;
+    
+    $results['subcategory'] = Subcategory::getById( $subcategoryId );
+    
+    $data = Article::getList( 100000,null, $results['subcategory'] ? $results['subcategory']->id : null );
+    
+    $results['articles'] = $data['results'];
+    $results['totalRows'] = $data['totalRows'];
+    
+    $data = Subcategory::getList();
+    $results['subcategories'] = array();
+    
+    foreach ( $data['results'] as $subcategory ) {
+        $results['subcategories'][$subcategory->id] = $subcategory;
+    }
+    
+    $results['pageHeading'] = $results['subcategory'] ?  $results['subcategory']->name : "Article Archive";
+    $results['pageTitle'] = $results['pageHeading'] . " | Widget News";
+    
+    require( TEMPLATE_PATH . "/subarchive.php" );
 }
 
 /**
@@ -75,6 +107,7 @@ function viewArticle()
     }
     
     $results['category'] = Category::getById($results['article']->categoryId);
+    $results['subcategory'] = Subcategory::getById($results['article']->subcategoryId);
     $results['pageTitle'] = $results['article']->title . " | Простая CMS";
     
     require(TEMPLATE_PATH . "/viewArticle.php");
@@ -94,6 +127,13 @@ function homepage()
     $results['categories'] = array();
     foreach ( $data['results'] as $category ) { 
         $results['categories'][$category->id] = $category;
+    }
+     $data = Subcategory::getList();   
+     $results['subcategories'] = array();
+     foreach ( $data['results'] as $subcategory ) { 
+         $results['subcategories'][$subcategory->id] = $subcategory;
+        
+        
     } 
     
     $results['pageTitle'] = "Простая CMS на PHP";

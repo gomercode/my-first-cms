@@ -23,6 +23,13 @@
                             <?php echo htmlspecialchars($results['categories'][$article->categoryId]->name )?>
                         </a>
                     </span>
+                    <span class="category">
+                        in 
+                        <a href=".?action=subarchive&amp;subcategoryId=<?php echo $article->subcategoryId?>">
+                            <?php echo htmlspecialchars($results['subcategories'][$article->subcategoryId]->name );
+                            ?>
+                        </a>
+                    </span>
                 <?php } 
                 else { ?>
                     <span class="category">
