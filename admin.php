@@ -155,6 +155,22 @@ function newArticle() {
 //            echo "<pre>";
 //            В $_POST данные о статье сохраняются корректно
         // Пользователь получает форму редактирования статьи: сохраняем новую статью
+           $category = explode("|",$_POST['subcategoryId']);
+        if (!($_POST['categoryId'] == $category[1])){
+           $results['article'] = new Article;
+           $results['article']->storeFormValues( $_POST );
+           $results['errorMessage'] = "Выбранная подкатегория не соответсвует категории";
+           $data = Category::getList();
+           $results['categories'] = $data['results'];
+           $data = Subcategory::getList();
+           $results['subcategories'] = $data['results'];  
+           require(TEMPLATE_PATH . "/admin/editArticle.php");
+            
+         
+        }else{
+             $_POST['subcategoryId'] = $category[0];
+        
+        
         $article = new Article();
         $article->storeFormValues( $_POST );
 //            echo "<pre>";
@@ -163,6 +179,9 @@ function newArticle() {
 //            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)          
         $article->insert();
         header( "Location: admin.php?status=changesSaved" );
+        }
+
+       
 
     } elseif ( isset( $_POST['cancel'] ) ) {
 
@@ -174,6 +193,8 @@ function newArticle() {
         $results['article'] = new Article;
         $data = Category::getList();
         $results['categories'] = $data['results'];
+        $data = Subcategory::getList();
+        $results['subcategories'] = $data['results'];
         require( TEMPLATE_PATH . "/admin/editArticle.php" );
     }
 }
@@ -191,15 +212,41 @@ function editArticle() {
     $results['formAction'] = "editArticle";
 
     if (isset($_POST['saveChanges'])) {
+        
+        
+        $category = explode("|",$_POST['subcategoryId']);
+        if (!($_POST['categoryId'] == $category[1])){
+             
+            
+           $results['article'] = new Article;
+           
+           
+           $results['article']->storeFormValues( $_POST );
+           
+
+           $results['errorMessage'] = "Выбранная подкатегория не соответсвует категории";
+           $data = Category::getList();
+           $results['categories'] = $data['results'];
+           $data = Subcategory::getList();
+           $results['subcategories'] = $data['results'];  
+           require(TEMPLATE_PATH . "/admin/editArticle.php");
+           return;
+           
+        }
+        
+      
 
         // Пользователь получил форму редактирования статьи: сохраняем изменения
-        if ( !$article = Article::getById( (int)$_POST['articleId'] ) ) {
+        if ( !$article = Article::getById( (int)$_POST['id'] ) ) {
             header( "Location: admin.php?error=articleNotFound" );
             return;
         }
+        
+          $_POST['subcategoryId'] = $category[0];
 
         $article->storeFormValues( $_POST );
-           
+        
+       
         $article->update();
         header( "Location: admin.php?status=changesSaved" );
 
@@ -213,6 +260,8 @@ function editArticle() {
         $results['article'] = Article::getById((int)$_GET['articleId']);
         $data = Category::getList();
         $results['categories'] = $data['results'];
+        $data = Subcategory::getList();
+        $results['subcategories'] = $data['results'];
         require(TEMPLATE_PATH . "/admin/editArticle.php");
     }
 

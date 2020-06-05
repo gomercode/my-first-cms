@@ -72,6 +72,7 @@ class Article
         
       if (isset($data['id'])) {
           $this->id = (int) $data['id'];
+
       }
       
       if (isset( $data['publicationDate'])) {
@@ -270,16 +271,17 @@ class Article
       // Обновляем статью
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE articles SET publicationDate=FROM_UNIXTIME(:publicationDate),"
-              ."categoryId=:categoryId, title=:title, summary=:summary, active=:active, subcategoryId=:subcategoryId"."content=:content WHERE id = :id";
+              ."categoryId=:categoryId, title=:title, summary=:summary, active=:active, subcategoryId=:subcategoryId,"." content=:content WHERE id = :id";
       
       $st = $conn->prepare ( $sql );
       $st->bindValue( ":publicationDate", $this->publicationDate, PDO::PARAM_INT );
       $st->bindValue( ":categoryId", $this->categoryId, PDO::PARAM_INT );
-      $st->bindValue( ":subcategoryId", $this->subcategoryId, PDO::PARAM_INT );
       $st->bindValue( ":title", $this->title, PDO::PARAM_STR );
       $st->bindValue( ":summary", $this->summary, PDO::PARAM_STR );
+      $st->bindValue( ":subcategoryId", $this->subcategoryId, PDO::PARAM_INT );
       $st->bindValue( ":content", $this->content, PDO::PARAM_STR );
       $st->bindValue( ":id", $this->id, PDO::PARAM_INT );
+      
        if($this->active == "check"){
            $st->bindValue(":active", "1", PDO::PARAM_INT );
         }

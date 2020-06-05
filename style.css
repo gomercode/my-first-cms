@@ -362,3 +362,7 @@ ul.ajax-load li {
     width: 5%;
     padding: 1em;
 }
+
+.hiddenOption{
+    display: none;
+}

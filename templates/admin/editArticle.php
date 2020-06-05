@@ -6,9 +6,8 @@
         echo "<pre>"; ?> Данные о массиве $results и типе формы передаются корректно-->
 
         <h1><?php echo $results['pageTitle']?></h1>
-
         <form action="admin.php?action=<?php echo $results['formAction']?>" method="post">
-            <input type="hidden" name="articleId" value="<?php echo $results['article']->id ?>">
+            <input type="hidden" name="id" value="<?php echo $results['article']->id ?>">
 
     <?php if ( isset( $results['errorMessage'] ) ) { ?>
             <div class="errorMessage"><?php echo $results['errorMessage'] ?></div>
@@ -40,6 +39,21 @@
                 <?php } ?>
                 </select>
               </li>
+              
+               <label for="categoryId">Article Subcategory</label>
+   <select name="subcategoryId">
+    <?php foreach ( $results['categories'] as $category ) { ?>
+    <optgroup  label="<?php echo htmlspecialchars( $category->name )?>"</optgroup>
+      <?php foreach ( $results['subcategories'] as $subcategory ) {
+          
+          if($category->id == $subcategory->category){?>
+               <option  value="<?php echo $subcategory->id?>|<?php echo $subcategory->category?>"<?php echo ( $subcategory->id == $results['article']->subcategoryId ) ? " selected" : ""?>><?php echo htmlspecialchars( $subcategory->name )?> </option>
+               
+         <?php }
+          ?>
+       <?php } ?>
+        <?php } ?>
+</select> 
 
               <li>
                 <label for="publicationDate">Publication Date</label>
