@@ -77,45 +77,45 @@ function login() {
     if (isset($_POST['login'])) {
 
         // Пользователь получает форму входа: попытка авторизировать пользователя
-        
+
         $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
         $sql = "SELECT * FROM users";
-        
+
         $st = $conn->prepare($sql);
         $st->bindValue(":login", $_POST['username'], PDO::PARAM_STR);
         $exe = $st->execute();
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
-       
-        
+
+
         foreach ($rows as $row){
              if($row['login'] == $_POST['username'] && $row['password'] == $_POST['password'] ){
                  if($row['activity'] == '1'){
-                     
+
                     $_SESSION['username'] = $_POST['username'];
-                    
+
                     header( "Location: admin.php");
-                  
+
                  }
-                 
+
                  else{
-                     
+
                      $results['errorMessage'] = "Вы не активны, попробуйте ещё раз.";
                      break;
-  
+
                  }
-                 
+
              }
-             
+
             else {
-                
+
                  $results['errorMessage'] = "Неправильный логин или пароль, попробуйте ещё раз.";
                }
-            
+
         }
                   require( TEMPLATE_PATH . "/admin/loginForm.php" );
-                 
-             
-        
+
+
+
 //        if($password[0]['password'] == $_POST['password'] ){
 //           $_SESSION['username'] = $_POST['username'];
 //          header( "Location: admin.php");
@@ -143,7 +143,7 @@ function logout() {
 
 
 function newArticle() {
-	  
+
     $results = array();
     $results['pageTitle'] = "New Article";
     $results['formAction'] = "newArticle";
@@ -163,25 +163,25 @@ function newArticle() {
            $data = Category::getList();
            $results['categories'] = $data['results'];
            $data = Subcategory::getList();
-           $results['subcategories'] = $data['results'];  
+           $results['subcategories'] = $data['results'];
            require(TEMPLATE_PATH . "/admin/editArticle.php");
-            
-         
+
+
         }else{
              $_POST['subcategoryId'] = $category[0];
-        
-        
+
+
         $article = new Article();
         $article->storeFormValues( $_POST );
 //            echo "<pre>";
 //            print_r($article);
 //            echo "<pre>";
-//            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)          
+//            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)
         $article->insert();
         header( "Location: admin.php?status=changesSaved" );
         }
 
-       
+
 
     } elseif ( isset( $_POST['cancel'] ) ) {
 
@@ -195,6 +195,7 @@ function newArticle() {
         $results['categories'] = $data['results'];
         $data = Subcategory::getList();
         $results['subcategories'] = $data['results'];
+
         require( TEMPLATE_PATH . "/admin/editArticle.php" );
     }
 }
@@ -202,51 +203,54 @@ function newArticle() {
 
 /**
  * Редактирование статьи
- * 
+ *
  * @return null
  */
 function editArticle() {
-	  
+
     $results = array();
     $results['pageTitle'] = "Edit Article";
     $results['formAction'] = "editArticle";
 
     if (isset($_POST['saveChanges'])) {
-        
-        
+
+
         $category = explode("|",$_POST['subcategoryId']);
         if (!($_POST['categoryId'] == $category[1])){
-             
-            
+
+
            $results['article'] = new Article;
-           
-           
+
+
            $results['article']->storeFormValues( $_POST );
-           
+
 
            $results['errorMessage'] = "Выбранная подкатегория не соответсвует категории";
            $data = Category::getList();
            $results['categories'] = $data['results'];
            $data = Subcategory::getList();
-           $results['subcategories'] = $data['results'];  
+           $results['subcategories'] = $data['results'];
            require(TEMPLATE_PATH . "/admin/editArticle.php");
            return;
-           
+
         }
-        
-      
+
+
 
         // Пользователь получил форму редактирования статьи: сохраняем изменения
-        if ( !$article = Article::getById( (int)$_POST['id'] ) ) {
+        if ( !$article = Article::getById( (int)$_POST['articleId'] ) ) {
             header( "Location: admin.php?error=articleNotFound" );
             return;
         }
-        
+
           $_POST['subcategoryId'] = $category[0];
 
+
+
         $article->storeFormValues( $_POST );
-        
-       
+
+        Author::update($_POST['articleId'],$_POST['users']);
+
         $article->update();
         header( "Location: admin.php?status=changesSaved" );
 
@@ -262,6 +266,8 @@ function editArticle() {
         $results['categories'] = $data['results'];
         $data = Subcategory::getList();
         $results['subcategories'] = $data['results'];
+        $data = User::getList();
+        $results['users'] = $data['results'];
         require(TEMPLATE_PATH . "/admin/editArticle.php");
     }
 
@@ -282,21 +288,21 @@ function deleteArticle() {
 
 function listArticles() {
     $results = array();
-    
+
     $data = Article::getList();
     $results['articles'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
-    
+
     $data = Category::getList();
     $results['categories'] = array();
-    foreach ($data['results'] as $category) { 
+    foreach ($data['results'] as $category) {
         $results['categories'][$category->id] = $category;
     }
-    
+
     $results['pageTitle'] = "Все статьи";
 
     if (isset($_GET['error'])) { // вывод сообщения об ошибке (если есть)
-        if ($_GET['error'] == "articleNotFound") 
+        if ($_GET['error'] == "articleNotFound")
             $results['errorMessage'] = "Error: Article not found.";
     }
 
@@ -331,8 +337,8 @@ function listCategories() {
 
     require( TEMPLATE_PATH . "/admin/listCategories.php" );
 }
-	  
-	  
+
+
 function newCategory() {
 
     $results = array();
@@ -414,16 +420,16 @@ function deleteCategory() {
 
 function listUsers() {
     $results = array();
-    
+
     $data = User::getList();
     $results['users'] = $data['results'];
     $results['totalRows'] = $data['totalRows'];
-    
-    
+
+
     $results['pageTitle'] = "Все Пользователи";
 
     if (isset($_GET['error'])) { // вывод сообщения об ошибке (если есть)
-        if ($_GET['error'] == "userNotFound") 
+        if ($_GET['error'] == "userNotFound")
             $results['errorMessage'] = "Error: User not found.";
     }
 
@@ -453,7 +459,7 @@ function deleteUser() {
 
 
 function editUser() {
-	  
+
     $results = array();
     $results['pageTitle'] = "Edit User";
     $results['formAction'] = "editUser";
@@ -467,7 +473,7 @@ function editUser() {
         }
 
         $user->storeFormValues( $_POST );
-           
+
         $user->update();
         header( "Location: admin.php?status=changesSaved" );
 
@@ -485,7 +491,7 @@ function editUser() {
 }
 
 function newUser() {
-	  
+
     $results = array();
     $results['pageTitle'] = "New User";
     $results['formAction'] = "newUser";
@@ -538,7 +544,7 @@ function listSubcategories() {
 
     require( TEMPLATE_PATH . "/admin/listSubcategories.php" );
 }
-	
+
 function newSubcategory() {
 
     $results = array();
@@ -580,7 +586,7 @@ function editSubcategory() {
         if ( !$subcategory = Subcategory::getById( (int)$_POST['subcategoryId'] ) ) {
           header( "Location: admin.php?action=listSubcategories&error=categoryNotFound" );
         }
-        
+
 
         $subcategory->storeFormValues( $_POST );
         $subcategory->update();

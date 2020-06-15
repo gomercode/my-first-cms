@@ -33,6 +33,7 @@ try {
     require(CLASS_PATH . "/Category.php");
     require(CLASS_PATH . "/User.php");  
     require(CLASS_PATH . "/Subcategory.php");  
+    require(CLASS_PATH . "/Author.php");
 
 } catch (Exception $ex) {
     echo "При загрузке конфигураций возникла проблема!<br><br>";

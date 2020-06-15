@@ -12,8 +12,8 @@ function init_get()
         console.log('ID статьи = ', contentId); 
         showLoaderIdentity();
         $.ajax({
-            url:'/ajax/showContentsHandler.php?articleId=' + contentId, 
-            dataType: 'json'
+            url:'/ajax/showContentsHandler.php?articleId=' + contentId
+
         })
         .done (function(obj){
             hideLoaderIdentity();
@@ -37,19 +37,24 @@ function init_get()
 
 function init_post() 
 {
-    $('a.ajaxArticleBodyByPost').one('click', function(){
-        var content = $(this).attr('data-contentId');
+    $('a.ajaxArticleBodyByPost').one('click', function(event){
+        var contentId = $(this).attr('data-contentId');
         showLoaderIdentity();
         $.ajax({
-            url:'/ajax/showContentsHandler.php', 
-            dataType: 'text',
+            url:'/ajax/showContentsHandler.php',
+            data: {
+                "articleId" : contentId
+            },
+            dataType: 'json',
 //            converters: 'json text',
             method: 'POST'
         })
         .done (function(obj){
+
+
             hideLoaderIdentity();
             console.log('Ответ получен', obj);
-            $('li.' + content).append(obj);
+            $('li.' + contentId).append(obj);
         })
         .fail(function(xhr, status, error){
             hideLoaderIdentity();
@@ -63,5 +68,5 @@ function init_post()
         
         return false;
         
-    });  
+    });
 }

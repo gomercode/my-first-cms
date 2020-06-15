@@ -176,12 +176,12 @@ class User
     */
     public function update() {
 
-      // Есть ли у объекта статьи ID?
+      // Есть ли у объекта user ID?
       if ( is_null( $this->id ) ) trigger_error ( "User::update(): "
               . "Attempt to update an user object "
               . "that does not have its ID property set.", E_USER_ERROR );
 
-      // Обновляем статью
+      // Обновляем user
       $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
       $sql = "UPDATE users SET login=:login, password=:password, activity=:activity  WHERE id = :id";
       
@@ -205,7 +205,7 @@ class User
     */
     public function delete() {
 
-      // Есть ли у объекта статьи ID?
+      // Есть ли у объекта user ID?
       if ( is_null( $this->id ) ) trigger_error ( "User::delete(): Attempt to delete an user object that does not have its ID property set.", E_USER_ERROR );
 
       // Удаляем статью

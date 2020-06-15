@@ -44,7 +44,10 @@ class Article
     * @var int ID категории статьи
     */
     public $subcategoryId = null;
-    
+    /**
+     * @var int ID автора
+     */
+    public $author = null;
     
     /**
     * Устанавливаем свойства с помощью значений в заданном массиве
@@ -69,9 +72,10 @@ class Article
      */
     public function __construct($data=array())
     {
-        
       if (isset($data['id'])) {
           $this->id = (int) $data['id'];
+
+
 
       }
       
@@ -105,6 +109,9 @@ class Article
           $this->subcategoryId = $data['subcategoryId'];  
           
       }
+        if (isset($data['author'])) {
+            $this->author = $data['author'];
+        }
     }
 
 
@@ -114,8 +121,9 @@ class Article
     * @param assoc Значения записи формы
     */
     public function storeFormValues ( $params ) {
-
       // Сохраняем все параметры
+
+
       $this->__construct( $params );
 
       // Разбираем и сохраняем дату публикации
@@ -237,6 +245,7 @@ class Article
         // Есть уже у объекта Article ID?
         if ( !is_null( $this->id ) ) trigger_error ( "Article::insert(): Attempt to insert an Article object that already has its ID property set (to $this->id).", E_USER_ERROR );
 
+
         // Вставляем статью
         $conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
         $sql = "INSERT INTO articles ( publicationDate, categoryId, title, summary, content, active, subcategoryId) VALUES ( FROM_UNIXTIME(:publicationDate), :categoryId, :title, :summary, :content, :active, :subcategoryId )";
@@ -254,6 +263,8 @@ class Article
               $st->bindValue( ":active", "0", PDO::PARAM_INT );
         }
         $st->execute();
+
+
         $this->id = $conn->lastInsertId();
         $conn = null;
     }
