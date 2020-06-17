@@ -4,7 +4,11 @@ $('.postArticle').one('click',function (event) {
     var contentId = $(this).attr('data-contentId');
     console.log(contentId);
     $.ajax({
-        url: '/ajax/showContentsHandler.php?articleId=' + contentId,
+        url: '/ajax/showContentsHandler.php',
+        data: {
+            "articleId" : contentId
+        },
+        dataType: 'json',
         method: 'POST'
     }).done(function (content) {
         $("." + contentId).children('.hidden').text(content);

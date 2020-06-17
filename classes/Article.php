@@ -123,7 +123,6 @@ class Article
     public function storeFormValues ( $params ) {
       // Сохраняем все параметры
 
-
       $this->__construct( $params );
 
       // Разбираем и сохраняем дату публикации

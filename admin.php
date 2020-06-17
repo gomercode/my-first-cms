@@ -218,11 +218,11 @@ function editArticle() {
         $category = explode("|",$_POST['subcategoryId']);
         if (!($_POST['categoryId'] == $category[1])){
 
-
            $results['article'] = new Article;
 
-
            $results['article']->storeFormValues( $_POST );
+
+           $results['article']->id = $_POST['articleId'];
 
 
            $results['errorMessage'] = "Выбранная подкатегория не соответсвует категории";
